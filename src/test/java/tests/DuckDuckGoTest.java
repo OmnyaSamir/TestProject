@@ -5,6 +5,7 @@ import org.openqa.selenium.WebElement;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import pages.DuckDuckGoPage;
+import utils.TestDataReader;
 
 import java.util.List;
 
@@ -31,14 +32,18 @@ public class DuckDuckGoTest extends BaseTest {
 
     @Test
     public void verifyFirstSearchResultLink() {
+        TestDataReader data = new TestDataReader("search-data.json");
+        String query = data.getString("searchQuery");
+        String expectedUrl = data.getString("expectedFirstResultUrl");
+
         DuckDuckGoPage page = new DuckDuckGoPage(wait).open();
-        page.searchUsingInput("Selenium WebDriver");
+        page.searchUsingInput(query);
 
         List<WebElement> resultLinks = page.getResultLinks();
         Assert.assertFalse(resultLinks.isEmpty(), "Expected at least one search result.");
 
         String firstResultUrl = resultLinks.get(0).getAttribute("href");
-        Assert.assertEquals(firstResultUrl, "https://www.selenium.dev/documentation/webdriver/");
+        Assert.assertEquals(firstResultUrl, expectedUrl);
     }
 
     @Test
