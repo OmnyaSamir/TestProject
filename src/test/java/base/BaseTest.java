@@ -31,10 +31,10 @@ public class BaseTest {
             URL gridUrl = URI.create(ConfigReader.getGridUrl()).toURL();
             switch (browser) {
                 case "firefox":
-                    driver = new RemoteWebDriver(gridUrl, new FirefoxOptions());
+                    driver = new RemoteWebDriver(gridUrl, buildFirefoxOptions());
                     break;
                 case "chrome":
-                    driver = new RemoteWebDriver(gridUrl, new ChromeOptions());
+                    driver = new RemoteWebDriver(gridUrl, buildChromeOptions());
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported TargetBrowser: " + browser);
@@ -42,10 +42,10 @@ public class BaseTest {
         } else {
             switch (browser) {
                 case "firefox":
-                    driver = new FirefoxDriver();
+                    driver = new FirefoxDriver(buildFirefoxOptions());
                     break;
                 case "chrome":
-                    driver = new ChromeDriver();
+                    driver = new ChromeDriver(buildChromeOptions());
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported TargetBrowser: " + browser);
@@ -62,5 +62,25 @@ public class BaseTest {
             driver.quit();
             driver = null;
         }
+    }
+
+    private boolean isCiEnvironment() {
+        return "true".equalsIgnoreCase(System.getenv("CI"));
+    }
+
+    protected ChromeOptions buildChromeOptions() {
+        ChromeOptions options = new ChromeOptions();
+        if (isCiEnvironment()) {
+            options.addArguments("--headless=new", "--no-sandbox", "--disable-dev-shm-usage");
+        }
+        return options;
+    }
+
+    protected FirefoxOptions buildFirefoxOptions() {
+        FirefoxOptions options = new FirefoxOptions();
+        if (isCiEnvironment()) {
+            options.addArguments("-headless");
+        }
+        return options;
     }
 }
