@@ -2,13 +2,18 @@ package base;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import utils.ConfigReader;
 
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URL;
 import java.time.Duration;
 
 public class BaseTest {
@@ -17,22 +22,34 @@ public class BaseTest {
     protected WebDriverWait wait;
 
     @BeforeMethod
-    public void setUp(Method method) {
+    public void setUp(Method method) throws Exception {
         String browser = "testFourthResultTitle".equals(method.getName())
                 ? "firefox"
                 : ConfigReader.getTargetBrowser();
 
-        switch (browser) {
-            case "firefox":
-                driver = new FirefoxDriver();
-                break;
-            case "chrome":
-                driver = new ChromeDriver();
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        "Unsupported TargetBrowser: '" + browser + "'. Supported browsers on Windows: chrome, firefox."
-                );
+        if (ConfigReader.isGridEnabled()) {
+            URL gridUrl = URI.create(ConfigReader.getGridUrl()).toURL();
+            switch (browser) {
+                case "firefox":
+                    driver = new RemoteWebDriver(gridUrl, new FirefoxOptions());
+                    break;
+                case "chrome":
+                    driver = new RemoteWebDriver(gridUrl, new ChromeOptions());
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported TargetBrowser: " + browser);
+            }
+        } else {
+            switch (browser) {
+                case "firefox":
+                    driver = new FirefoxDriver();
+                    break;
+                case "chrome":
+                    driver = new ChromeDriver();
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported TargetBrowser: " + browser);
+            }
         }
 
         driver.manage().window().maximize();

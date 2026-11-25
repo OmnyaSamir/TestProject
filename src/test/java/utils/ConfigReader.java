@@ -27,4 +27,20 @@ public class ConfigReader {
         String value = properties.getProperty("TargetBrowser", "chrome");
         return value.trim().toLowerCase();
     }
+
+    public static boolean isGridEnabled() {
+        String override = System.getProperty("UseGrid");
+        String value = (override != null && !override.isBlank() && !override.startsWith("${"))
+                ? override
+                : properties.getProperty("UseGrid", "false");
+        return Boolean.parseBoolean(value.trim());
+    }
+
+    public static String getGridUrl() {
+        String override = System.getProperty("GridUrl");
+        if (override != null && !override.isBlank() && !override.startsWith("${")) {
+            return override.trim();
+        }
+        return properties.getProperty("GridUrl", "http://localhost:4444").trim();
+    }
 }
